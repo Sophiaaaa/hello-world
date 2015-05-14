@@ -1,0 +1,100 @@
+#By LUO Chen at  CST 22:51 2015/5/14
+#利用 Python 中的 jieba 模块来处理中文自然语言，包括的部分：
+#1.基本分词（三种模式）；
+#2.添加用户自定义词典；
+#3.调整词典；关键词提取（两种算法）；
+#4.词性标注；
+#5.返回词语在原文中的起止位置。
+#待分词的文件是弗洛姆的《人道主义伦理学： 生活艺术的应用科学》（节选），存放在 E:\Python\toparse.txt 中。
+#首先读取文件:
+file = open("E:\\Python\\toparse.txt")
+text = file.read()
+#jieba.cut 方法接受三个输入参数: 需要分词的字符串；cut_all 参数用来控制是否采用全模式；HMM 参数用来控制是否使用 HMM 模型
+#基本分词 1：精确模式，在默认状态下，精确模式就是默认模式。因此可以将两种模式合并执行。
+#导入模块，开始分词：
+import jieba
+seg_list = jieba.cut(text) # 或者是：seg_list = jieba.cut(text, cut_all = False)
+print ("Default Mode: " + "/".join(seg_list))
+#基本分词 2：全模式，只需要更改 cut_all 的属性。
+seg_list_1 = jieba.cut(text, cut_all = True)
+print ("Full Mode: " + "/".join(seg_list_1))
+#基本分词 3：搜索引擎模式 (Search Engine Mode)。
+#jieba.cut_for_search 方法接受两个参数：需要分词的字符串；是否使用 HMM 模型。该方法适合用于搜索引擎构建倒排索引的分词，粒度比较细。
+#jieba.cut 以及 jieba.cut_for_search 返回的结构都是一个可迭代的 generator，可以使用 for 循环来获得分词后得到的每一个词语(unicode)，或者用
+#jieba.lcut 以及 jieba.lcut_for_search 直接返回 list
+seg_list_2 = jieba.cut_for_search(text)
+for word in seg_list_2:
+    print (word)
+#添加自定义词典
+#用法： jieba.load_userdict(file_name) # file_name 为自定义词典的路径
+#词典格式和 dict.txt 一样，一个词占一行；每一行分三部分，一部分为词语，另一部分为词频（可省略），最后为词性（可省略），用空格隔开，词频可省略，使用计算出的能保证分出该词的词频。
+#本例中自定义词典的存放位置：E:\Python\userdict.txt
+#注意 jieba.posseg
+import jieba
+jieba.load_userdict("E:\\Python\\userdict.txt")
+import jieba.posseg as pseg
+seg_list_3 = jieba.cut(text)
+print ("/".join(seg_list_3))
+print ("=" * 60)
+result = pseg.cut(text)
+for w in result:
+    print (w.word, "/", w.flag, ",")
+#调整词典
+#使用 add_word(word, freq = None, tag = None) 和 del_word(word) 可在程序中动态修改词典。
+#使用 suggest_freq(segemnt, tune = True) 可以调节单个词语的词频，使其能/不能被分出来。
+#自动计算的词频在使用 HMM 新词发现功能时可能无效，所以最好指定 HMM = False.
+#由于待分析文本过长，本部分使用单句字符串。
+print ("/".join(jieba.cut("我目前就读于中国传媒大学新闻传播学部新闻学院。", HMM = False)))
+add = ["中国传媒大学", "新闻传播学部", "新闻学院"]
+jieba.add_word(add[0])
+jieba.add_word(add[1])
+jieba.add_word(add[2])
+print ("/".join(jieba.cut("我目前就读于中国传媒大学新闻传播学部新闻学院。", HMM = False)))
+jieba.suggest_freq("中国传媒大学新闻传播学部新闻学院", True)
+print ("/".join(jieba.cut("我目前就读于中国传媒大学新闻传播学部新闻学院。", HMM = False)))
+$关键词提取
+#1. TF-IDF 算法 (具体请搜索 Wiki)
+#import jieba.analyse
+#jieba.analyse.extract_tags(sentence, topK = 20, withWeight = False, allowPOS = ())
+#sentence 为待分析的文本
+$topK 为返回几个 TF-IDF 权重最大的关键词，默认值为 20
+#withWeight 为是否一并返回关键词的权重值，默认值为 False
+#allowPOS 仅包括指定词性的词，默认为空，即不进行筛选
+import jieba.analyse
+print ("关键词" + "\t" + "权重")
+for x, w in jieba.analyse.extract_tags(text, withWeight = True):
+    print ("%s   %s" %(x, w))
+#关键词提取
+#2. TextRank 算法
+#jieba.analyse.textrank(sentence, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v')) 直接使用，接口相同，注意默认过滤词性。
+#jieba.analyse.TextRank() 新建自定义 TextRank 实例。
+#TextRank 基本思想:
+#将待抽取关键词的文本进行分词
+#以固定窗口大小(默认为5，通过span属性调整)，词之间的共现关系，构建图
+#计算图中节点的PageRank，注意是无向带权图
+for x, w in jieba.analyse.textrank(text, topK = 20, withWeight = True):
+    print ("%s  %s" %(x, w))
+#关键词提取 - 总结：算法不一样，提取的关键词亦不同。
+#词性标注
+#jieba.posseg.POSTokenizer(tokenizer=None) 新建自定义分词器，tokenizer 参数可指定内部使用的 jieba.Tokenizer 分词器。jieba.posseg.dt 为默认词性标注分词器。
+#标注句子分词后每个词的词性，采用和 ictclas 兼容的标记法。
+import jieba.posseg as pseg
+for w in (pseg.cut(text)):
+    print ("%s  %s" %(w.word, w.flag))
+#Tokenize 函数：返回词语在原文中的起始位置,返回的数据类型是列表
+#参数只能接受 Unicode
+#所以待分析文件在保存时最好保存为 Unicode 编码
+#此处将待分析文件另存一份适用的编码格式，最后将结果写入文件 tokenize_result.txt 中
+file = open("E:\\Python\\toparse_1.txt")
+text_new = file.read()
+print text_new
+
+for tk in (jieba.tokenize(u"帝听见了他的祈祷，就像对待天使一样，把自己的圣名深藏于苏西亚的心中。但这时，苏西亚像只小狗似的爬在床底下，于是，他担心自己会变成动物，就嚎哭道：“上帝啊，再让我像苏西亚一样的敬爱您吧！”")):
+    print ("Word %s \t\t start: %d \t\t end: %d" %(tk[0], tk[1], tk[2]))
+    
+for tk in (jieba.tokenize(u"帝听见了他的祈祷，就像对待天使一样，把自己的圣名深藏于苏西亚的心中。但这时，苏西亚像只小狗似的爬在床底下，于是，他担心自己会变成动物，就嚎哭道：“上帝啊，再让我像苏西亚一样的敬爱您吧！”")):
+    t = ("Word %s \t\t start: %d \t\t end: %d" %(tk[0], tk[1], tk[2]))
+    print t
+tokenize_result = open("E:\\Python\\tokenize_result.txt", "w")
+tokenize_result.write(t.encode("utf-8"))
+tokenize_result.close()
