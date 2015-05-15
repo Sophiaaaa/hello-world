@@ -1,0 +1,16 @@
+import math
+a = float(raw_input("a is: "))
+b = float(raw_input("b is: "))
+c = float(raw_input("c is: "))
+if a != 0:
+    delta = (b ** 2) - (4 * a * c)
+    if delta < 0:
+        print "No solution."
+    elif delta == 0:
+        s = -b / (2 * a)
+        print "Solution is: ", s
+    elif delta > 0:
+        root = sqrt(delta)
+        x1 = (-b + root) / (2 * a)
+        x2 = (-b - root) / (2 * a)
+        print "Solution are: ", x1, x2
