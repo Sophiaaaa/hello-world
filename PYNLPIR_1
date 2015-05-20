@@ -1,0 +1,53 @@
+#coding = UTF-8
+import pynlpir
+pynlpir.open()
+s = "长江市长江大桥参加了长江大桥的开通仪式。"
+pynlpir.segment(s, pos_tagging = True)
+
+pynlpir.segment(s, pos_tagging = False)
+
+for word in pynlpir.segment(s, pos_tagging = False):
+    print word
+
+for word in pynlpir.segment(s, pos_tagging = True):
+    print word[0],word[1]
+
+for word in pynlpir.segment(s, pos_tagging = True, pos_names = "child"):
+    print word[0],word[1]
+    
+for word in pynlpir.segment(s, pos_tagging = True, pos_names = "all"):
+    print word[0], word[1]
+    
+pynlpir.nlpir.FileProcess("C:\\Users\\Luo Chen\\Desktop\\test.txt", "C:\\Users\\Luo Chen\\Desktop\\output.txt",True)
+
+sou = open("C:\\Users\\Luo Chen\\Desktop\\source.txt")
+source = sou.read()
+print source
+for word in pynlpir.segment(source, pos_tagging = False):
+    print word
+    
+stop = open("C:\\Users\\Luo Chen\\Desktop\\stopword.txt")
+stopword = stop.read()
+print stopword
+
+pynlpir.nlpir.AddUserWord("天安门城楼")
+pynlpir.nlpir.AddUserWord(" 很久没有")
+pynlpir.nlpir.AddUserWord("《漂洋过海来看你》")
+for word in pynlpir.segment(source, pos_tagging = False):
+    print word
+
+stopWords = []
+for word in open("C:\\Users\\Luo Chen\\Desktop\\stopword.txt","r"):
+    stopWords.append(word.strip())
+print stopWords
+
+for line in open("C:\\Users\\Luo Chen\\Desktop\\source.txt", "r").readlines():
+    segmented_line = pynlpir.segment(line.strip(), pos_tagging = False)
+    origin_line = ""
+    stayed_line = ""
+    for word in segmented_line:
+        origin_line = origin_line + word + " "
+        if word.encode("utf-8") not in stopWords:
+            stayed_line = stayed_line + word + " "
+    print "原句：",origin_line
+    print "过滤后：",stayed_line
