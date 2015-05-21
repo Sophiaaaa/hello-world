@@ -1,0 +1,53 @@
+import requests
+from bs4 import BeautifulSoup
+
+#抓取黄页网站上关于咖啡店铺的数据
+url = "http://www.yellowpages.com/los-angeles-ca/coffee?g=los%20angeles%2C%20ca&q=coffee"
+r = requests.get(url)
+soup = BeautifulSoup(r.content)
+print soup
+#输出网页的全部源代码
+
+#通过Chrome中的审查元素，查看需要抓取的信息所在的标签域
+links = soup.find_all("a")
+for link in links:
+  if "http" in link.get("href"):
+    print "<a href = '%s'>%s</a>" %(link.get("href"), link.text)
+
+#在审查元素中可以发现：所要抓取的咖啡店铺名称、地址、电话都处在一个个div内，并且class都等于info
+general_data = soup.find_all("div", {"class": "info"})
+print general_data
+#可以抓取所有与条件符合的源代码
+
+for item in general_data:
+  print item.text
+#输出源代码中所有的文字信息，但此时的信息略显杂乱，需要进一步结构化
+
+#细分出咖啡店铺的名称信息
+for item in general_data:
+  print item.content[0].text
+#输出结果类似于Caffe LatteMenu，但是不需要后面的Menu
+
+#进一步分析可以发现，在info类中，店铺名字隐藏在class = “business-name”中
+for item in general_data:
+  print item.contents[0].find_all("a", {"class": "business-name"})[0].text
+
+#接下来抓取地址，地址包含在p标签内，class等于adr
+for item in general_data:
+  print item.contents[0].find_all("a", {"class": "business-name"})[0].text
+  print item.contents[1].find_all("p", {"class": "adr"})[0].text
+  
+#同理，构建新的div，“class” = “phones phone primary”抓取电话号码
+#对于最后的抓取，防止报错可以使用try...except...,pass
+for item in general_data:
+    print item.contents[0].find_all("a", {"class": "business-name"})[0].text
+    print item.contents[1].find_all("p", {"class": "adr"})[0].text
+    try:
+        print item.contents[1].find_all("span", {"itemprop": "address"})[0].text
+        print item.contents[1].find_all("span", {"itemprop": "addressLocality"})[0].text
+    except:
+        pass
+    try:
+        print item.contents[1].find_all("li", {"class": "primary"})[0].text
+    except:
+        pass
