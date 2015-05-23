@@ -1,0 +1,16 @@
+# Author:LUO Chen, at CST 2015/5/23 21:00
+# Locu API: Gives you access to real-time local business data, from opening hours to price lists, such as restaurant menus.
+# Locu API URL: https://dev.locu.com/
+# 利用 Locu API 输入地区，查询餐馆信息
+import urllib2
+import json
+def restaurant_search(location):
+  api_key = *Your Locu API*
+  url = "https://api.locu.com/v1_0/venue/search/?api_key=" + api_key
+  locality = location.replace(" ", "%20")
+  search_url = url + "&locality=" + locality + "&category=restaurant"
+  data = json.load(urllib2.urlopen(search_url))
+  for item in data['objects']:
+    print str(item['name']) + ", " + str(item['locality']) + ", " + str(item['phone'])
+
+# Test: restaurant("Rome")
