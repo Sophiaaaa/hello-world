@@ -13,4 +13,4 @@ def restaurant_search(location):
   for item in data['objects']:
     print str(item['name']) + ", " + str(item['locality']) + ", " + str(item['phone'])
 
-# Test: restaurant("Rome")
+# Test: restaurant_search("Rome")
