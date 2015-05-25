@@ -18,7 +18,6 @@ def cafe_spider(max_pages):
         for link in soup.findAll("a", {"class": "business-name"}):
             href = str("http://www.yellowpages.com") + str(link.get("href"))
             cafe_name = link.string
-            print cafe_name
             print href
             get_single_cafe_data(href)
         page += 1
@@ -32,8 +31,8 @@ def get_single_cafe_data(item_url):
     soup = BeautifulSoup(plain_text)
     for business_name in soup.findAll("h1", {"itemprop": "name"}):
         print business_name.string
-    for item_name in soup.findAll("div", {"class": "hours"}):
-        print item_name.string
+    for phone_number in soup.findAll("p", {"class": "phone"}):
+        print phone_number.string
     for link in soup.findAll("a", {"class": "view-menu"}):
         href = "http://www.yellowpage.com" + link.get("href")
         print href
