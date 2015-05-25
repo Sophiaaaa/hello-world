@@ -1,0 +1,40 @@
+#抓取黄页上Los Angeles, CA的咖啡店铺数据 
+#首页URL: http://www.yellowpages.com/search?search_terms=coffee&geo_location_terms=Los%20Angeles%2C%20CA&page=1
+
+import requests
+from bs4 import BeautifulSoup
+
+#requests获取源代码，而BeautifulSoup使源码结构化从而便于提取信息
+#首先进行：顶层结构翻页抓取
+
+def cafe_spider(max_pages):
+    page = 1
+    while page <= max_pages:  # 考虑到如果仅仅抓取一页的情况
+        url = "http://www.yellowpages.com/search?search_terms=coffee&geo_location_terms=Los%20Angeles%2C%20CA&page=" + str(page)
+        source_code = requests.get(url)
+        plain_text = source_code.text
+        soup = BeautifulSoup(plain_text)
+        for link in soup.findAll("a", {"class": "business-name"}):
+            href = str("http://www.yellowpages.com") + str(link.get("href"))
+            cafe_name = link.string
+            print cafe_name
+            print href
+            get_single_cafe_data(href)
+        page += 1
+        
+#其次进行：二层结构点击链接后二级页面抓取
+#最后进行：三层结构抓取咖啡店铺的菜单链接
+
+def get_single_cafe_data(item_url):
+    source_code = requests.get(item_url)
+    plain_text = source_code.text
+    soup = BeautifulSoup(plain_text)
+    for business_name in soup.findAll("h1", {"itemprop": "name"}):
+        print business_name.string
+    for item_name in soup.findAll("div", {"class": "hours"}):
+        print item_name.string
+    for link in soup.findAll("a", {"class": "view-menu"}):
+        href = "http://www.yellowpage.com" + link.get("href")
+        print href
+
+#测试: cafe_spider(3)
