@@ -1,0 +1,19 @@
+#本例直接抓取百度贴吧的网页
+import string, urllib2
+
+def bdtieba(url, beginpage, endpage):
+  for i in range(beginpage, endpage + 1):
+    #可以任意指定存储格式与文件命名方式
+    name = string.zfill(i, 3) + ".html"
+    print "Downloading the page " + str(i) + " and stored as " + "html file."
+    file = open(name, "w+")
+    content = urllib2.urlopen(url + str(i)).read()
+    file.write(content)
+    file.close()
+
+url = raw_input(u"输入贴吧地址，去掉pn=后面的数字：\n")
+beginpage = int(raw_input(u"开始页码：\n"))
+endpage = int(raw_input(u"结束页码：\n"))
+
+#调用函数
+bdtieba(url, beginpage, endpage)
