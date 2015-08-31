@@ -1,0 +1,27 @@
+from bs4 import BeautifulSoup
+from urllib2 import urlopen
+from time import sleep
+import requests
+
+basic_url = "http://movie.douban.com/nowplaying/beijing/"
+url = urlopen(basic_url).read()
+soup = BeautifulSoup(url)
+
+sections = soup.find_all("li", "poster")  #返回一个列表
+details = []
+for section in sections:
+    detail_url = section.a["href"]
+    details.append(detail_url)
+
+for detail in details:
+    detail_info = urlopen(detail).read()
+    d_soup = BeautifulSoup(detail_info)
+    
+    movie_name = d_soup.find("h1").span.string
+    year = d_soup.find("span", class_ = "year").string
+    director = d_soup.find("span", class_ =  "attrs").a.string
+    stars = d_soup.find("span", class_ = "actor").a.string
+    
+    sleep(1)
+    
+    print (u"电影名称: " + movie_name + "| " + u"上映年份: " + year + "| " + u"导演：" + director + "| " + u"主演：" + stars)
