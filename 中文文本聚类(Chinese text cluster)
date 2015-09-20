@@ -1,0 +1,42 @@
+#!/usr/bin/python
+#LUO Chen
+#2015.9.20
+#Main module: BosonNLP HTTP API封装库(BosonNLP Python SDK)
+
+from bosonnlp import BosonNLP
+
+nlp = BosonNLP("----Your API Key----")
+text = []
+
+def cluster_answer(index, result):
+  print u"第%个聚类中有%s份文档" %(index + 1, result["num"])
+  for element in result["list"]:
+    print text[element]
+  print u"本聚类的中心文档"
+  print text[result["_id"]]
+
+'''
+  单文本分析时，文本聚类的返回格式示例：
+  [{u'_id': 45, u'list': [2, 4, 43, 44, 45], u'num': 5}]
+  其中，
+  "_id": 中心文档索引值
+  "list": 聚类中所有文档的索引值
+  "num": 聚类中所有文档的数量值
+'''
+
+import time #测算运行时间间距
+time_1 = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time()))
+print u"聚类始于：%s" %(time_1)
+if __name__ == "__main__":
+  with open("~\\demo.txt", "r") as f:
+    text = []
+    for line in f:
+      text.append(line.decode("utf-8"))
+  cluster_merge = nlp.cluster(text, timeout = 120) #120意指运行时间限定在120s内
+  sort_cluster_merge = sorted(cluster_merge, key = lambda cluster: cluster["num"], reverse = True)
+  for index, cluster in enumerate(sort_cluster_merge):
+    cluster_answer(index, cluster)
+  time_2 = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time()))
+  print u"聚类终于：%s" %(time_2)
+
+#测试文档大小：15.9KB, 聚类时间消耗：<=6s.
