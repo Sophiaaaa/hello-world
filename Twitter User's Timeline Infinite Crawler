@@ -1,0 +1,40 @@
+# !/usr/bin/python
+# LUO Chen
+# 2016.1.31
+# coding: utf-8
+# 推文的id可以在Chrome中右键单击推文的时间，查看href后面的数值
+import twitter, json, time
+
+api = twitter.Api(
+    consumer_key = "XXXXXXXX", 
+    consumer_secret = "XXXXXXXX", 
+    access_token_key = "XXXXXXXX", 
+    access_token_secret = "XXXXXXXX"
+)
+#验证API是否可用
+print api.VerifyCredentials()
+
+t = True
+#抓取日期ending的推文id设置为None
+ending = None
+def getResult(max_id):
+    global ending
+    lst = []
+    results = api.GetUserTimeline(screen_name = "ChinaEUMission", 
+                                  count = 20, #每次返回20条推文
+                                  max_id = ending)
+    for result in results:
+        lst.append(json.loads(str(result)))
+        ending = int(lst[-1]["id"])
+    return lst
+
+with open("saving path and file name", "w") as f:
+    while t:
+        final = getResult(max_id)
+        time.sleep(5)
+        if len(final) < 20:
+            break
+        else:
+            for r in final:
+                f.write(str(r) + "\n")
+    f.close()
