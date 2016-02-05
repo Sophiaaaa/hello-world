@@ -1,0 +1,50 @@
+# !/usr/bin/python
+# LUO Chen
+# 2016.2.5
+# coding: utf-8
+
+from lxml import etree
+import requests, json, sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+class spider(object):
+
+    def __init__(self):
+        print 'Crawling...'
+
+    def writecontent(self, contentdict):
+        f.writelines('author: ' + str(contentdict['user_name']) + '\n')
+        f.writelines('author_id: ' + str(contentdict['user_id']) + '\n')
+        f.writelines('reply_num: ' + str(contentdict['reply_num']) + '\n')
+        f.writelines('title: ' + str(contentdict['title']) + '\n')
+        f.writelines('time: ' + str(contentdict['time']) + '\n\n')
+
+    def spider(self, url):
+        html = requests.get(url)
+        selector = etree.HTML(html.text)
+        item = {}
+        content_field = selector.xpath('//li[@class="j_thread_list clearfix"]')
+        for each in content_field:
+            data_field = json.loads(each.xpath('@data-field')[0].replace('&quot', ''))
+            author_name = data_field['author_name']
+            user_id = data_field['id']
+            reply_num = data_field['reply_num']
+            title = each.xpath('div[@class="t_con cleafix"]/div[@class="threadlist_li_right j_threadlist_li_right "]/div[@class="threadlist_lz clearfix"]/div[@class="threadlist_text threadlist_title j_th_tit  "]/a/text()')[0]
+            time = each.xpath('div[@class="t_con cleafix"]/div[@class="threadlist_li_right j_threadlist_li_right "]/div[@class="threadlist_detail clearfix"]/div[@class="threadlist_author"]/span[@class="threadlist_reply_date j_reply_data"]/text()')[0]
+            print str(author_name) + '\t' + str(user_id) + '\t' + str(reply_num) + '\t' + str(title) + '\t' + str(time)
+            item['user_name'] = author_name
+            item['user_id'] = user_id
+            item['reply_num'] = reply_num
+            item['title'] = title
+            item['time'] = time
+
+if __name__ == "__main__":
+    f = open('content.txt', 'a')
+    tiebaspider = spider()
+    info = []
+    for i in range(0, 501, 50):
+        new_page = 'http://tieba.baidu.com/f?kw=python&ie=utf-8&pn=' + str(i)
+        contents = tiebaspider.spider(new_page)
+        info.append(contents)
+    tiebaspider.writecontent(info)
