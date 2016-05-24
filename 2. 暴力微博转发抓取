@@ -1,0 +1,38 @@
+# usr!/bin/python
+# Author: LUO Chen
+# Written in 2016/05/24
+
+# coding=utf-8
+# 首先进入weibo.cn，确定希望抓取转发路径的微博，然后右键“转发”，然后在审查元素中寻找到链接，在新窗口中打开
+import requests
+from lxml import etree
+# 粘贴链接，需要包含"page="
+url = '********'
+page = int(raw_input('How many pages do you want? '))
+cookies = {'Cookie': '********'}
+for i in range(1, page + 1):
+    new_url = url + str(i)
+    source = requests.get(new_url, cookies = cookies)
+    html = etree.HTML(bytes(bytearray(source.text, encoding = 'utf-8')))
+    div = html.xpath('//div[@class = "c"]')
+    parent_div = div[3: -1]
+    for div in parent_div:
+        account = div.xpath('a/text()')[0]
+        zan_1 = div.xpath('span[@class = "cc"]/a/text()')
+        if len(zan_1) != 0:
+            thumb = zan_1[0]
+        else:
+            thumb = ''
+        time_1 = div.xpath('span[@class = "ct"]/text()')
+        if len(time_1) != 0:
+            time_and_clientSide = time_1[0]
+        else:
+            time_and_clientSide = ''
+        content_1 = div.xpath('string(.)')
+        if len(content_1) != 0:
+            content_2 = content_1.replace(thumb, '')
+            content_3 = content_2.replace(account, '')
+            content = content_3.replace(time_and_clientSide, '')
+        else:
+            content = ''
+        print account + ' | ' + content + ' | ' + thumb + ' | ' + time_and_clientSide
