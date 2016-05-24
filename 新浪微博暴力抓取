@@ -1,0 +1,38 @@
+# !/usr/bin/python
+# Author: LUO Chen
+# Written in 2016/05/24
+
+# coding = utf-8
+# 导入库，没有该库请先安装好pip install
+import requests
+from lxml import etree
+# 从weibo.cn抓取内容，需要使用cookie，获取cookie的方法是利用Fiddler或者直接在Chrome中审核元素
+cookies = {'Cookie': '********'}
+# 粘贴你要抓取的微博地址，粘贴时要保留"?page="，等号后面的数字需要删去
+# 若需要抓取指定时限内的微博，可以实现进行时间段筛选，这样会更加具有针对性
+url = '********'
+# 输入需要抓取的页数，必须大于1，页数请从weibo.cn中查看
+page = int(raw_input('How many pages do you want? '))
+for i in range(1, page + 1):
+    new_url = url + str(i)
+    source = requests.get(new_url, cookies = cookies)
+    html = etree.HTML(bytes(bytearray(source.text, encoding = 'utf-8')))
+    p_div = html.xpath('//div[@class = "c"]')
+    parent_div = p_div[:-2]
+    for div in parent_div:
+        div_1 = div[0].xpath('string(.)')
+        if len(div) == 2:
+            div_2 = div[1].xpath('string(.)')
+        else:
+            div_2 = ''
+        if len(div) == 3:
+            div_3 = div[2].xpath('string(.)')
+        else:
+            div_3 = ''
+        # 设定如下逻辑判断条件是因为以防万一，如果一直未发现存在4个子div，即可删去以下逻辑判断
+        if len(div) == 4:
+            div_4 = div[3].xpath('string(.)')
+        else:
+            div_4 = ''
+        # 利用"$"进行分隔，方便在Excel等数据工具中进行处理
+        print div_1 + '$' + div_2 + '$' + div_3 + '$' + div_4
