@@ -1,0 +1,44 @@
+#!/usr/bin/python
+#coding:utf-8
+'''
+最近遇到一个有趣的问题：
+"
+数字197可以被称为循环素数，因为197的三个数位循环移位后的数字：197,971,719均为素数。100以内这样的数字包括13个:
+2,3,5,7,11,13,17,31,37,71,73,79,97。要求任意正整数n以内一共有多少个这样的循环素数。
+> 输入格式:
+一个正整数n。
+> 输出格式:
+n以内循环素数的数目。
+> 输入样例:
+100
+> 输出样例:
+13
+"
+最开始，我坚持不用函数而是仅仅依赖程序控制结构去实现，发现输出结果总是存在错误，最后放弃了这一思路，改用函数实现。
+不得不说，这个题目非常地有意思，至少让我因为程序控制结构的无法实现而郁闷了三天……
+现在将函数实现的方法记录下来，我稍稍修改了原题（打印出了某个正整数内的所有循环素数）。
+'''
+from math import sqrt
+
+def prime(n):
+    for i in range(2, int(sqrt(n)) + 1):
+        if n % i == 0:
+            break
+    else:
+        return True
+
+def loop_digit(m):
+    for i in range(1, len(str(m)) + 1):
+        s_new = int(str(m)[i:] + str(m)[:i])
+        if prime(s_new) != True:
+            break
+    else:
+        return True
+
+n = int(raw_input('Enter a number: '))
+count = 0
+for i in range(2, n):
+    if loop_digit(i):
+        print i
+        count += 1
+print 'The sum of loop-prime is:', count
