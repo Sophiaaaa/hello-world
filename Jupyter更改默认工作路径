@@ -1,0 +1,12 @@
+方式一：
+- 打开Windows的cmd，在cmd中输入jupyter notebook --generate-config
+- 可以看到路径为D:\Users……找到此路径修改jupyter_notebook_config.py文件
+- 找到如下配置：
+## The directory to use for notebooks and kernels. 
+#c.NotebookApp.notebook_dir = '' 
+- 将其改为 
+## The directory to use for notebooks and kernels. 
+c.NotebookApp.notebook_dir = 'E:\Jupyter' 
+
+方式二：
+更改快捷方式的起始目录的方法
